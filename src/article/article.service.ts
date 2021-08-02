@@ -25,7 +25,7 @@ export class ArticleService {
       article.tagList = [];
     }
 
-    article.slug = this.getSlug(createArticleDto.title);
+    article.slug = ArticleService.getSlug(createArticleDto.title);
 
     article.author = currentUser;
 
@@ -33,9 +33,15 @@ export class ArticleService {
   }
 
   async getArticleBySlug(slug: string): Promise<ArticleEntity> {
-    return await this.articleRepository.findOne({
+    const article = await this.articleRepository.findOne({
       where: { slug: slug },
     });
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    return article;
   }
 
   async deleteArticle(
@@ -55,11 +61,37 @@ export class ArticleService {
     return await this.articleRepository.delete({ slug });
   }
 
+  async updateArticle(
+    slug: string,
+    currentUserId: number,
+    updateArticleDto: CreateArticleDto,
+  ): Promise<ArticleEntity> {
+    const article = await this.articleRepository.findOne({
+      where: { slug: slug },
+    });
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    if (article.author.id != currentUserId) {
+      throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
+    }
+
+    if (article.title != updateArticleDto.title) {
+      article.slug = ArticleService.getSlug(updateArticleDto.title);
+    }
+
+    Object.assign(article, updateArticleDto);
+
+    return await this.articleRepository.save(article);
+  }
+
   buildArticleResponse(article: ArticleEntity): ArticleResponseInterface {
     return { article };
   }
 
-  private getSlug(title: string): string {
+  private static getSlug(title: string): string {
     return (
       slugify(title, { lower: true }) +
       '-' +
