@@ -9,6 +9,7 @@ import {
   Put,
   UsePipes,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { AuthGuard } from '../user/guards/auth.guard';
@@ -16,6 +17,7 @@ import { UserEntity } from '../user/user.entity';
 import { User } from '../user/decorators/user.decorator';
 import { CreateArticleDto } from './dto/create.article.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
+import { ArticlesResponseInterface } from './types/articlesResponseInterface';
 
 @Controller('articles')
 export class ArticleController {
@@ -30,6 +32,14 @@ export class ArticleController {
     if (article) {
       return this.articleService.buildArticleResponse(article);
     }
+  }
+
+  @Get()
+  async findAll(
+    @User('id') currentUserId: number,
+    @Query() query: any,
+  ): Promise<ArticlesResponseInterface> {
+    return await this.articleService.findAll(currentUserId, query);
   }
 
   @Post()
