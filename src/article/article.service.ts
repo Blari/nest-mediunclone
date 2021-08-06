@@ -7,7 +7,6 @@ import { UserEntity } from '../user/user.entity';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import slugify from 'slugify';
 import { ArticlesResponseInterface } from './types/articlesResponseInterface';
-import { log } from 'util';
 
 @Injectable()
 export class ArticleService {
