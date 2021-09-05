@@ -30,6 +30,12 @@ export class ArticleService {
 
     const articlesCount = await queryBuilder.getCount();
 
+    if (query.tag) {
+      queryBuilder.andWhere('articles.tagList LIKE :tag', {
+        tag: `%${query.tag}%`,
+      });
+    }
+
     if (query.author) {
       const author = await this.userRepository.findOne({
         username: query.author,
